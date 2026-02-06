@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="/enhanced-styles.css">
     
     <script src="notifications.js"></script>
+    <script src="rewards-system.js"></script>
+    <script src="live-feed.js"></script>
     <style>
         * { font-family: 'DM Sans', sans-serif; }
         body { background: #0a0a0a; color: #fafafa; }
@@ -474,6 +476,11 @@
                     };
                     
                     localStorage.setItem(keyStorageKey, JSON.stringify(currentKeyData));
+                    
+                    // Award points for key generation (if rewards system is loaded)
+                    if (window.RewardsSystem && window.RewardsSystem.awardKeyPoints) {
+                        window.RewardsSystem.awardKeyPoints();
+                    }
                 }
                 
                 document.getElementById('access-key').textContent = currentKeyData.key;
