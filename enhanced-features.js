@@ -1,4 +1,4 @@
-// KeyGuardius Enhanced Features - v2.5
+// KeyGuardius Enhanced Features
 // Features: Keyboard shortcuts, copy feedback, theme toggle, key history, mobile menu, PWA
 
 (function() {
