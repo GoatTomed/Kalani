@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work.ink Method - KeyGuardius</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KeyGuardius">
+    <link rel="manifest" href="/manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Enhanced Styles -->
+    <link rel="stylesheet" href="/enhanced-styles.css">
+    
+    <script src="notifications.js"></script>
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        body { background: #0a0a0a; color: #fafafa; }
+        
+        /* Light mode overrides */
+        html.light { background: #ffffff !important; }
+        .light body { 
+            background: #ffffff !important; 
+            color: #111827 !important; 
+        }
+        
+        .grain::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+        .light .grain::before {
+            opacity: 0.02;
+        }
+        
+        .dot-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .light .dot-pattern {
+            background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        }
+        
+        .btn-primary { transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Enhanced Progress Bar Styles */
+        .progress-bar-container {
+            position: relative;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-fill {
+            position: relative;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 9999px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Animated diagonal lines pattern - moves right to left */
+        .progress-bar-fill::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent 0px,
+                transparent 4px,
+                rgba(255, 255, 255, 0.25) 4px,
+                rgba(255, 255, 255, 0.25) 8px
+            );
+            background-size: 14px 14px;
+            animation: diagonal-move 1s linear infinite;
+        }
+
+        @keyframes diagonal-move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 14px 14px;
+            }
+        }
+
+        /* Glow effect */
+        .progress-bar-fill {
+            box-shadow: 
+                0 0 10px rgba(59, 130, 246, 0.3),
+                0 0 20px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+    </style>
+</head>
+<body class="min-h-screen grain relative">
+    <div class="absolute inset-0 dot-pattern"></div>
+
+    <nav class="relative border-b border-white/[0.08] backdrop-blur-xl bg-black/40 z-10">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/dashboard" class="flex items-center gap-2.5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="font-semibold text-[15px]">KeyGuardius</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="/scripts" class="text-sm text-zinc-400 hover:text-blue-400 transition-colors">Scripts</a>
+                <a href="/dashboard" class="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-all">
+                    Get Key
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="checkpoint-content" class="relative max-w-4xl mx-auto px-6 py-12 z-10">
+        <!-- Header -->
+        <div class="mb-8 border border-white/[0.08] rounded-2xl p-8 bg-white/[0.02]">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Work.ink Method</h1>
+                    <p class="text-zinc-400">by <span class="text-blue-400">Tom</span> • Using Work.ink verification</p>
+                </div>
+                <div class="text-right">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                        <span class="text-sm font-medium text-blue-400" id="progress-text">0/2 Complete</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Progress Bar -->
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- UNIFIED CHECKPOINT/KEY DISPLAY -->
+        <div class="mt-8">
+            <div class="border border-white/[0.08] rounded-2xl p-8 bg-white/[0.02]">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg mb-4">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="8" cy="8" r="4"/>
+                            <path d="M12 12L21 21M18 18v3M18 18h3"/>
+                        </svg>
+                        <span class="text-blue-400 font-semibold text-sm uppercase tracking-wide">GET KEY</span>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-2">Complete Verification</h2>
+                    <p class="text-zinc-400">Complete a quick verification to get your key and start using our scripts</p>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm text-zinc-400">Progress</span>
+                        <span class="text-sm font-semibold text-blue-400" id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="main-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Checkpoints Section (hidden when key is displayed) -->
+                <div id="checkpoints-section">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Checkpoints (<span id="checkpoint-progress">0/2</span>)</span>
+                        </div>
+                        
+                        <!-- Checkpoint Cards -->
+                        <div id="steps-container" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Key Display Section (hidden until checkpoints complete) -->
+                <div id="key-section" class="hidden">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Your Keys (<span id="key-count">1/1</span>)</span>
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-zinc-400">Time Left</span>
+                                    <span class="font-mono font-bold text-zinc-200" id="key-countdown">00:00:00</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-zinc-400">Status</span>
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-md">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                        <span class="text-xs font-semibold text-green-400">Active</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-zinc-400">Actions</span>
+                                    <button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-md transition-colors">
+                                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        <span class="text-xs font-semibold text-zinc-400">Reset</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Card -->
+                        <div class="bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 border border-white/[0.08] rounded-xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <circle cx="8" cy="8" r="4"/>
+                                            <path d="M12 12L21 21M18 18v3M18 18h3"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold">Access Key</h3>
+                                        <p class="text-xs text-zinc-500">Valid for 24 hours</p>
+                                    </div>
+                                </div>
+                                <button onclick="copyKey()" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                    </svg>
+                                    Copy Key
+                                </button>
+                            </div>
+                            <div class="bg-black/40 border border-white/[0.08] rounded-lg p-4">
+                                <code id="access-key" class="font-mono text-sm text-blue-400">Loading...</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const checkpoint = {
+            id: 'cp_workink_001',
+            name: 'Work.ink Method',
+            user: 'Tom',
+            steps: [
+                {
+                    num: 1,
+                    title: 'First Step',
+                    prov: 'Work.ink',
+                    url: 'https://work.ink/2dbK/GetKey'
+                },
+                {
+                    num: 2,
+                    title: 'Last Step',
+                    prov: 'Work.ink',
+                    url: 'https://work.ink/2dbK/Last%20Step'
+                }
+            ]
+        };
+
+        let deviceId = localStorage.getItem('device_id');
+        if (!deviceId) {
+            deviceId = Array(16).fill(0).map(() => Math.floor(Math.random()*16).toString(16).toUpperCase()).join('');
+            localStorage.setItem('device_id', deviceId);
+        }
+
+        let countdownInterval;
+
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let key = '';
+            for (let i = 0; i < 16; i++) {
+                if (i > 0 && i % 4 === 0) key += '-';
+                key += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return key;
+        }
+
+        function copyKey() {
+            const keyElement = document.getElementById('access-key');
+            const key = keyElement.textContent;
+            const button = event.currentTarget;
+            const originalHTML = button.innerHTML;
+            
+            navigator.clipboard.writeText(key).then(() => {
+                if (typeof notify !== 'undefined') {
+                    notify.success('Key copied to clipboard!');
+                }
+                
+                button.innerHTML = `
+                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                `;
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                if (typeof notify !== 'undefined') {
+                    notify.error('Failed to copy key');
+                }
+            });
+        }
+
+        function updateCountdown(expiryTime) {
+            const now = Date.now();
+            const remaining = expiryTime - now;
+
+            if (remaining <= 0) {
+                document.getElementById('key-countdown').textContent = '00:00:00';
+                document.getElementById('key-count').textContent = '0/1';
+                clearInterval(countdownInterval);
+                
+                // RESET EVERYTHING WHEN KEY EXPIRES
+                // 1. Remove the expired key from storage
+                const keyStorageKey = `kg_key_workink_${deviceId}`;
+                localStorage.removeItem(keyStorageKey);
+                
+                // 2. Clear all verification tokens for this checkpoint
+                const userData = JSON.parse(localStorage.getItem(`kg_data_${checkpoint.user}`) || '{}');
+                const sessionTokens = userData.sessionTokens || {};
+                
+                checkpoint.steps.forEach(step => {
+                    const sessionKey = `${checkpoint.id}-${step.num}-${deviceId}`;
+                    delete sessionTokens[sessionKey];
+                });
+                
+                userData.sessionTokens = sessionTokens;
+                localStorage.setItem(`kg_data_${checkpoint.user}`, JSON.stringify(userData));
+                
+                // 3. Hide key section and show checkpoints again
+                document.getElementById('key-section').classList.add('hidden');
+                document.getElementById('checkpoints-section').classList.remove('hidden');
+                
+                // 4. Re-render steps and update progress
+                renderSteps();
+                checkProgress();
+                
+                // 5. Show notification
+                if (typeof notify !== 'undefined') {
+                    notify.warning('Key expired! Complete checkpoints again to get a new key.', 5000);
+                }
+                
+                return;
+            }
+
+            const hours = Math.floor(remaining / 3600000);
+            const minutes = Math.floor((remaining % 3600000) / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            document.getElementById('key-countdown').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            const userData = JSON.parse(localStorage.getItem(`kg_data_${checkpoint.user}`) || '{}');
+            const sessionTokens = userData.sessionTokens || {};
+            
+            container.innerHTML = checkpoint.steps.map(step => {
+                const sessionKey = `${checkpoint.id}-${step.num}-${deviceId}`;
+                const isVerified = sessionTokens[sessionKey] && sessionTokens[sessionKey].verified;
+                
+                return `
+                    <div class="bg-black/40 border border-white/[0.08] rounded-xl p-5 flex items-center justify-between group hover:border-blue-500/20 transition-colors ${isVerified ? 'opacity-60' : ''}">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-lg ${isVerified ? 'bg-green-500/10 border-green-500/20' : 'bg-blue-500/10 border-blue-500/20'} border flex items-center justify-center">
+                                ${isVerified ? 
+                                    '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' :
+                                    `<span class="text-blue-500 font-bold">${step.num}</span>`
+                                }
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-base font-semibold mb-0.5">${step.title}</h3>
+                                <p class="text-xs text-zinc-500">via ${step.prov}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            ${isVerified ? 
+                                '<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-md"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div><span class="text-xs font-semibold text-green-400">Verified</span></div>' :
+                                `<a href="/verify?u=${checkpoint.user}&s=${step.num}&cp=${checkpoint.id}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                    <span>Start</span>
+                                </a>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function checkProgress() {
+            const userData = JSON.parse(localStorage.getItem(`kg_data_${checkpoint.user}`) || '{}');
+            let sessionTokens = userData.sessionTokens || {};
+            const now = Date.now();
+            
+            // Check if key has expired - if so, reset progress
+            const keyStorageKey = `kg_key_workink_${deviceId}`;
+            const keyData = JSON.parse(localStorage.getItem(keyStorageKey) || 'null');
+            
+            if (keyData && keyData.expiryTime <= now) {
+                // Key expired - reset all checkpoint progress
+                checkpoint.steps.forEach(step => {
+                    const sessionKey = `${checkpoint.id}-${step.num}-${deviceId}`;
+                    delete sessionTokens[sessionKey];
+                });
+                userData.sessionTokens = sessionTokens;
+                localStorage.setItem(`kg_data_${checkpoint.user}`, JSON.stringify(userData));
+                localStorage.removeItem(keyStorageKey);
+            }
+            
+            let completedSteps = 0;
+            checkpoint.steps.forEach(step => {
+                const sessionKey = `${checkpoint.id}-${step.num}-${deviceId}`;
+                if (sessionTokens[sessionKey] && sessionTokens[sessionKey].verified) {
+                    completedSteps++;
+                }
+            });
+
+            const progress = (completedSteps / checkpoint.steps.length) * 100;
+            document.getElementById('progress-text').textContent = `${completedSteps}/${checkpoint.steps.length} Complete`;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            
+            // Update progress percentage and bar in unified section
+            document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
+            document.getElementById('main-progress-bar').style.width = `${progress}%`;
+            document.getElementById('checkpoint-progress').textContent = `${completedSteps}/${checkpoint.steps.length}`;
+
+            if (completedSteps === checkpoint.steps.length) {
+                // Hide checkpoints, show key
+                document.getElementById('checkpoints-section').classList.add('hidden');
+                document.getElementById('key-section').classList.remove('hidden');
+                
+                let currentKeyData = JSON.parse(localStorage.getItem(keyStorageKey) || 'null');
+                
+                if (!currentKeyData || currentKeyData.expiryTime <= now) {
+                    const newKey = generateKey();
+                    const expiryTime = now + (24 * 60 * 60 * 1000);
+                    
+                    currentKeyData = {
+                        key: newKey,
+                        expiryTime: expiryTime,
+                        deviceId: deviceId,
+                        checkpointId: checkpoint.id
+                    };
+                    
+                    localStorage.setItem(keyStorageKey, JSON.stringify(currentKeyData));
+                }
+                
+                document.getElementById('access-key').textContent = currentKeyData.key;
+                
+                // Update key count - show 1/1 when key is active, 0/1 when expired
+                const hasActiveKey = currentKeyData && currentKeyData.expiryTime > now;
+                document.getElementById('key-count').textContent = hasActiveKey ? '1/1' : '0/1';
+                
+                if (countdownInterval) clearInterval(countdownInterval);
+                updateCountdown(currentKeyData.expiryTime);
+                countdownInterval = setInterval(() => updateCountdown(currentKeyData.expiryTime), 1000);
+            } else {
+                // Show checkpoints, hide key
+                document.getElementById('checkpoints-section').classList.remove('hidden');
+                document.getElementById('key-section').classList.add('hidden');
+            }
+
+            renderSteps();
+        }
+
+        checkProgress();
+        setInterval(checkProgress, 2000);
+    </script>
+
+    <!-- Mobile Detection Script - Only show popup on Desktop/PC/macOS -->
+    <script>
+        // Function to detect if user is on mobile/tablet device
+        function isMobileOrTablet() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Mobile/Tablet regex detection
+            const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i;
+            
+            // Touch screen detection
+            const isTouchDevice = (('ontouchstart' in window) || 
+                                  (navigator.maxTouchPoints > 0) || 
+                                  (navigator.msMaxTouchPoints > 0));
+            
+            // Screen width detection (tablets and phones typically ≤1024px)
+            const isSmallScreen = window.innerWidth <= 1024;
+            
+            // Return true if mobile/tablet detected
+            return mobileRegex.test(userAgent) || (isTouchDevice && isSmallScreen);
+        }
+
+        // Only load Work.ink popup script for desktop users
+        if (!isMobileOrTablet()) {
+            console.log('Desktop device detected - loading Work.ink popup');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.work.ink/js/redirect.js?id=2838';
+            script.setAttribute('data-url', 'https://work.ink/direct/2838');
+            script.setAttribute('data-max', '1');
+            document.body.appendChild(script);
+        } else {
+            console.log('Mobile/Tablet device detected - skipping Work.ink popup');
+        }
+    </script>
+    
+    <!-- Enhanced Features -->
+    <script src="/enhanced-features.js"></script>
+</body>
+</html>

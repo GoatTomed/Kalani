@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scripts - KeyGuardius</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="notifications.js"></script>
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        html { background: #0a0a0a; min-height: 100%; }
+        body { 
+            background: #0a0a0a; 
+            color: #fafafa; 
+            position: relative;
+            min-height: 100vh;
+        }
+        body::before { 
+            content: ''; 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); 
+            opacity: 0.03; 
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px); 
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .card-hover { transition: all 0.3s; }
+        .card-hover:hover { 
+            background: rgba(255, 255, 255, 0.04); 
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary { transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-up {
+            animation: fadeUp 0.6s ease forwards;
+        }
+        
+        .script-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px 12px 0 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <nav class="relative border-b border-white/[0.08] backdrop-blur-xl bg-black/40 z-10">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/dashboard" class="flex items-center gap-2.5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="font-semibold text-[15px]">KeyGuardius</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="/scripts" class="text-sm text-blue-400 font-semibold">Scripts</a>
+                <a href="/dashboard" class="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-all">
+                    Get Key
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative max-w-7xl mx-auto px-6 py-12 z-10">
+        <!-- Header -->
+        <div class="mb-12 text-center">
+            <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Available Scripts</h1>
+            <p class="text-zinc-400 text-lg">Explore and manage your script collection</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] text-center">
+                <div class="text-4xl font-bold text-blue-400 mb-2" id="scriptCount">0</div>
+                <div class="text-sm text-zinc-500">Total Scripts</div>
+            </div>
+            <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] text-center">
+                <div class="text-4xl font-bold text-green-400 mb-2" id="activeCount">0</div>
+                <div class="text-sm text-zinc-500">Active Scripts</div>
+            </div>
+            <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] text-center">
+                <div class="text-4xl font-bold text-red-400 mb-2" id="disabledCount">0</div>
+                <div class="text-sm text-zinc-500">Disabled Scripts</div>
+            </div>
+        </div>
+
+        <!-- Scripts Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="scriptGrid"></div>
+    </div>
+
+    <!-- Floating Admin Button -->
+    <button id="adminToggle" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+    </button>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminPanel" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div class="max-w-2xl w-full bg-black/90 border border-white/[0.08] rounded-2xl p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Admin Panel</h2>
+                <button id="closeAdmin" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center border border-white/10">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-3 mb-6">
+                <button id="tab1Btn" class="flex-1 py-3 px-4 rounded-lg border border-white/10 bg-blue-600 text-white font-semibold transition-all">
+                    Add Script
+                </button>
+                <button id="tab2Btn" class="flex-1 py-3 px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-400 font-semibold transition-all">
+                    Custom Key Link
+                </button>
+            </div>
+
+            <!-- Tab 1: Add Script -->
+            <div id="tab1" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Script Name</label>
+                    <input type="text" id="scriptName" placeholder="Enter script name..." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Description</label>
+                    <textarea id="scriptDesc" placeholder="Enter description..." rows="3" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Script Code</label>
+                    <textarea id="scriptCode" placeholder='loadstring(game:HttpGet("https://pastebin.com/raw/example"))()' rows="3" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white font-mono text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Thumbnail URL</label>
+                    <input type="text" id="scriptThumbnail" placeholder="https://i.imgur.com/example.png" value="https://i.imgur.com/1hwYNcw.png" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Status</label>
+                    <select id="scriptStatus" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        <option value="active">Active</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+                </div>
+                <button id="addScriptBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all btn-primary">
+                    Add Script
+                </button>
+            </div>
+
+            <!-- Tab 2: Custom Key Link -->
+            <div id="tab2" class="hidden space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Script Name</label>
+                    <input type="text" id="customScriptName" placeholder="Enter script name..." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-400 mb-2">Custom Get Key Link</label>
+                    <input type="text" id="customKeyLink" placeholder="https://example.com/custom-key" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <button id="addCustomKeyBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all btn-primary">
+                    Create Custom Key Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load scripts from localStorage or use default
+        let scripts = JSON.parse(localStorage.getItem('kg_scripts') || '[{"name":"Violence District","description":"Premium script with advanced features for Violence District Roblox Game.","status":"active","thumbnail":"https://i.imgur.com/1hwYNcw.png","script":"loadstring(game:HttpGet(\\"https://pastebin.com/raw/it5WAGAe\\"))()"}]');
+
+        // Save scripts to localStorage
+        function saveScripts() {
+            localStorage.setItem('kg_scripts', JSON.stringify(scripts));
+        }
+
+        // Render scripts
+        function renderScripts() {
+            const grid = document.getElementById('scriptGrid');
+            grid.innerHTML = '';
+
+            scripts.forEach((script, index) => {
+                const card = document.createElement('div');
+                card.className = 'border border-white/[0.08] rounded-xl bg-white/[0.02] overflow-hidden card-hover fade-up';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const statusColor = script.status === 'active' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400';
+                
+                card.innerHTML = `
+                    <img src="${script.thumbnail}" alt="${script.name}" class="script-thumbnail" onerror="this.src='https://i.imgur.com/1hwYNcw.png'">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">${script.name}</h3>
+                        <p class="text-sm text-zinc-500 mb-4">${script.description}</p>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 ${statusColor} border rounded-lg mb-4 text-xs font-semibold">
+                            <div class="w-2 h-2 rounded-full ${script.status === 'active' ? 'bg-green-400' : 'bg-red-400'}"></div>
+                            ${script.status.toUpperCase()}
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="/Workink" class="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm btn-primary">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                                Get Key
+                            </a>
+                            <button class="flex-1 h-10 px-4 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 font-semibold text-sm btn-primary copy-btn" data-script="${script.script || script.name}">
+                                Copy Script
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+
+            // Add copy functionality
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const scriptText = this.getAttribute('data-script');
+                    navigator.clipboard.writeText(scriptText);
+                    const original = this.textContent;
+                    this.innerHTML = '<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!';
+                    notify.success('Script copied to clipboard!');
+                    setTimeout(() => {
+                        this.textContent = original;
+                    }, 2000);
+                });
+            });
+
+            // Update stats
+            document.getElementById('scriptCount').textContent = scripts.length;
+            document.getElementById('activeCount').textContent = scripts.filter(s => s.status === 'active').length;
+            document.getElementById('disabledCount').textContent = scripts.filter(s => s.status === 'disabled').length;
+        }
+
+        // Admin Panel Toggle
+        document.getElementById('adminToggle').addEventListener('click', () => {
+            document.getElementById('adminPanel').classList.remove('hidden');
+        });
+
+        document.getElementById('closeAdmin').addEventListener('click', () => {
+            document.getElementById('adminPanel').classList.add('hidden');
+        });
+
+        // Tab switching
+        document.getElementById('tab1Btn').addEventListener('click', () => {
+            document.getElementById('tab1').classList.remove('hidden');
+            document.getElementById('tab2').classList.add('hidden');
+            document.getElementById('tab1Btn').classList.remove('bg-white/5', 'text-zinc-400');
+            document.getElementById('tab1Btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('tab2Btn').classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('tab2Btn').classList.add('bg-white/5', 'text-zinc-400');
+        });
+
+        document.getElementById('tab2Btn').addEventListener('click', () => {
+            document.getElementById('tab1').classList.add('hidden');
+            document.getElementById('tab2').classList.remove('hidden');
+            document.getElementById('tab2Btn').classList.remove('bg-white/5', 'text-zinc-400');
+            document.getElementById('tab2Btn').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('tab1Btn').classList.remove('bg-blue-600', 'text-white');
+            document.getElementById('tab1Btn').classList.add('bg-white/5', 'text-zinc-400');
+        });
+
+        // Add script functionality
+        document.getElementById('addScriptBtn').addEventListener('click', () => {
+            const name = document.getElementById('scriptName').value.trim();
+            const desc = document.getElementById('scriptDesc').value.trim();
+            const code = document.getElementById('scriptCode').value.trim();
+            const thumbnail = document.getElementById('scriptThumbnail').value.trim();
+            const status = document.getElementById('scriptStatus').value;
+
+            if (name && desc && code) {
+                scripts.push({
+                    name: name,
+                    description: desc,
+                    script: code,
+                    status: status,
+                    thumbnail: thumbnail || "https://i.imgur.com/1hwYNcw.png"
+                });
+                saveScripts();
+                renderScripts();
+
+                // Clear form
+                document.getElementById('scriptName').value = '';
+                document.getElementById('scriptDesc').value = '';
+                document.getElementById('scriptCode').value = '';
+                document.getElementById('scriptThumbnail').value = 'https://i.imgur.com/1hwYNcw.png';
+
+                notify.success('Script added successfully!');
+                document.getElementById('adminPanel').classList.add('hidden');
+            } else {
+                notify.error('Please fill in all required fields!');
+            }
+        });
+
+        // Add custom key link
+        document.getElementById('addCustomKeyBtn').addEventListener('click', () => {
+            const name = document.getElementById('customScriptName').value.trim();
+            const link = document.getElementById('customKeyLink').value.trim();
+
+            if (name && link) {
+                scripts.push({
+                    name: name,
+                    description: `Custom key link: ${link}`,
+                    status: 'active',
+                    thumbnail: 'https://i.imgur.com/1hwYNcw.png',
+                    customLink: link
+                });
+                saveScripts();
+                renderScripts();
+
+                // Clear form
+                document.getElementById('customScriptName').value = '';
+                document.getElementById('customKeyLink').value = '';
+
+                notify.success('Custom key link created!');
+                document.getElementById('adminPanel').classList.add('hidden');
+            } else {
+                notify.error('Please fill in all fields!');
+            }
+        });
+
+        // Initial render
+        renderScripts();
+    </script>
+</body>
+</html>

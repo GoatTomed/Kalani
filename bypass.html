@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alert - KeyGuardius</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="notifications.js"></script>
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        html { background: #0a0a0a; min-height: 100%; }
+        body { 
+            background: #0a0a0a; 
+            color: #fafafa; 
+            position: relative;
+            min-height: 100vh;
+        }
+        body::before { 
+            content: ''; 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); 
+            opacity: 0.03; 
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px); 
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <nav class="relative border-b border-white/[0.08] backdrop-blur-xl bg-black/40 z-10">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/dashboard" class="flex items-center gap-2.5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="font-semibold text-[15px]">KeyGuardius</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="/scripts" class="text-sm text-zinc-400 hover:text-blue-400 transition-colors">Scripts</a>
+                <div class="relative group">
+                    <button class="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-all flex items-center gap-2">
+                        Get Key
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-black/95 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
+                        <a href="/Workink" class="block px-4 py-3 hover:bg-white/5 text-sm transition-colors border-b border-white/5">
+                            <div class="font-semibold text-blue-400">Work.ink</div>
+                            <div class="text-xs text-zinc-500">2 checkpoints</div>
+                        </a>
+                        <a href="/Lockr" class="block px-4 py-3 hover:bg-white/5 text-sm transition-colors">
+                            <div class="font-semibold text-purple-400">Lockr</div>
+                            <div class="text-xs text-zinc-500">2 checkpoints</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative max-w-md mx-auto px-6 py-20 z-10">
+        <!-- Warning State -->
+        <div id="warning-state" class="hidden">
+            <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                
+                <h1 class="text-2xl font-bold mb-2">Bypass Detected</h1>
+                <p class="text-zinc-500 text-sm mb-6">Invalid verification attempt</p>
+
+                <div class="bg-white/[0.02] border border-white/[0.08] rounded-lg p-4 mb-6">
+                    <div class="flex items-center justify-between text-sm mb-3">
+                        <span class="text-zinc-400">Attempts</span>
+                        <span class="font-bold text-blue-400"><span id="attempt-count">0</span>/3</span>
+                    </div>
+                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div id="warning-progress" class="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                        
+                <div class="flex gap-3">
+                    <a href="/Workink" class="flex-1 inline-flex items-center justify-center gap-2 h-11 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm">
+                        Return to Checkpoint
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blocked State -->
+        <div id="blocked-state" class="hidden">
+            <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                
+                <h1 class="text-2xl font-bold mb-2 text-red-400">Temporarily Blocked</h1>
+                <p class="text-zinc-500 text-sm mb-6">Too many bypass attempts</p>
+
+                <div class="bg-white/[0.02] border border-white/[0.08] rounded-lg p-4 mb-6">
+                    <div class="flex items-center justify-between text-sm mb-2">
+                        <span class="text-zinc-400">Time remaining</span>
+                        <span class="font-bold text-blue-400 font-mono text-lg" id="time-remaining">--:--</span>
+                    </div>
+                    <div class="text-xs text-zinc-500">15 minute block</div>
+                </div>
+                        
+                <p class="text-xs text-zinc-500 mt-4">Please wait for the block to expire, then try again with valid verification.</p>
+            </div>
+        </div>
+
+        <!-- Attempts Log -->
+        <div class="mt-6 border border-white/[0.08] rounded-xl p-4 bg-white/[0.02]">
+            <h2 class="text-sm font-semibold mb-3 text-zinc-400">Recent Attempts</h2>
+            <div id="attempts-log" class="space-y-2 text-xs"></div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_ATTEMPTS = 3;
+        const BLOCK_DURATION = 15 * 60 * 1000;
+        let countdownInterval;
+
+        function checkBypassStatus() {
+            const bypassKey = 'kg_bypass_attempts';
+            let bypassData = JSON.parse(localStorage.getItem(bypassKey) || '{"attempts": [], "blocked": false, "blockedUntil": null}');
+            
+            const params = new URLSearchParams(window.location.search);
+            const currentAttempt = parseInt(params.get('attempt')) || bypassData.attempts.length;
+            
+            if (bypassData.blocked && bypassData.blockedUntil) {
+                const now = Date.now();
+                if (now < bypassData.blockedUntil) {
+                    showBlockedState(bypassData);
+                    return;
+                } else {
+                    bypassData.blocked = false;
+                    bypassData.blockedUntil = null;
+                    bypassData.attempts = [];
+                    localStorage.setItem(bypassKey, JSON.stringify(bypassData));
+                }
+            }
+            
+            if (currentAttempt >= MAX_ATTEMPTS) {
+                bypassData.blocked = true;
+                bypassData.blockedUntil = Date.now() + BLOCK_DURATION;
+                localStorage.setItem(bypassKey, JSON.stringify(bypassData));
+                showBlockedState(bypassData);
+            } else {
+                showWarningState(currentAttempt, bypassData);
+            }
+            
+            displayAttemptsLog(bypassData.attempts);
+        }
+
+        function showWarningState(attemptCount, bypassData) {
+            document.getElementById('warning-state').classList.remove('hidden');
+            document.getElementById('blocked-state').classList.add('hidden');
+            
+            document.getElementById('attempt-count').textContent = attemptCount;
+            
+            const progress = (attemptCount / MAX_ATTEMPTS) * 100;
+            document.getElementById('warning-progress').style.width = `${progress}%`;
+            
+            if (attemptCount === 1) {
+                notify.info('Bypass attempt detected. 2 warnings remaining.', 5000);
+            } else if (attemptCount === 2) {
+                notify.warning('Second bypass attempt. One more = 15 min block!', 7000);
+            }
+        }
+
+        function showBlockedState(bypassData) {
+            document.getElementById('warning-state').classList.add('hidden');
+            document.getElementById('blocked-state').classList.remove('hidden');
+            
+            updateCountdown(bypassData.blockedUntil);
+            countdownInterval = setInterval(() => {
+                const remaining = updateCountdown(bypassData.blockedUntil);
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/Workink';
+                }
+            }, 1000);
+            
+            notify.error('Blocked for 15 minutes.', 10000);
+        }
+
+        function updateCountdown(blockedUntil) {
+            const now = Date.now();
+            const remaining = blockedUntil - now;
+            
+            if (remaining <= 0) {
+                document.getElementById('time-remaining').textContent = '00:00';
+                return 0;
+            }
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            document.getElementById('time-remaining').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            return remaining;
+        }
+
+        function displayAttemptsLog(attempts) {
+            const logContainer = document.getElementById('attempts-log');
+            
+            if (attempts.length === 0) {
+                logContainer.innerHTML = '<p class="text-zinc-500">No attempts recorded</p>';
+                return;
+            }
+            
+            logContainer.innerHTML = attempts.slice(-5).reverse().map((attempt, index) => `
+                <div class="bg-white/[0.02] border border-white/[0.05] rounded p-2 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] font-bold text-blue-400">
+                            ${attempts.length - index}
+                        </span>
+                        <span class="text-zinc-400">Step ${attempt.step}</span>
+                    </div>
+                    <span class="text-zinc-600">${new Date(attempt.timestamp).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+        }
+
+        checkBypassStatus();
+    </script>
+</body>
+</html>

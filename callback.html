@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Verification - KeyGuardius</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="notifications.js"></script>
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        html { background: #0a0a0a; min-height: 100%; }
+        body { background: #0a0a0a; color: #fafafa; min-height: 100vh; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <!-- Loading State -->
+        <div id="loading-state" class="border border-white/10 rounded-2xl p-8 bg-white/5 backdrop-blur-xl text-center">
+            <div class="w-16 h-16 mx-auto mb-6 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                <svg class="w-8 h-8 text-blue-500 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Verifying...</h1>
+            <p class="text-zinc-400 text-sm mb-4">Processing your verification</p>
+            <div class="flex items-center justify-center gap-1">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+            </div>
+        </div>
+
+        <!-- Success State -->
+        <div id="success-state" class="hidden border border-white/10 rounded-2xl p-8 bg-white/5 backdrop-blur-xl text-center">
+            <div class="w-16 h-16 mx-auto mb-6 bg-green-500/10 rounded-2xl flex items-center justify-center">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold mb-2 text-green-400">Verification Complete!</h1>
+            <p class="text-zinc-400 text-sm mb-6">Redirecting back to checkpoint...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden border border-white/10 rounded-2xl p-8 bg-white/5 backdrop-blur-xl text-center">
+            <div class="w-16 h-16 mx-auto mb-6 bg-red-500/10 rounded-2xl flex items-center justify-center">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold mb-2 text-red-400">Verification Error</h1>
+            <p id="error-message" class="text-zinc-400 text-sm mb-6">Something went wrong</p>
+            <a href="/dashboard" class="inline-flex items-center gap-2 h-11 px-6 bg-white/10 hover:bg-white/15 text-white rounded-lg border border-white/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-xs text-zinc-600">
+                Powered by <span class="text-blue-500 font-semibold">KeyGuardius</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function handleCallback() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const username = params.get('u');
+                const stepNum = parseInt(params.get('s'));
+                const checkpointId = params.get('cp');
+                const token = params.get('token');
+
+                console.log('📥 Callback received:');
+                console.log('   Username:', username);
+                console.log('   Step:', stepNum);
+                console.log('   Checkpoint ID:', checkpointId);
+                console.log('   Token:', token || 'NO TOKEN (Lockr mode)');
+
+                if (!username || !stepNum || !checkpointId) {
+                    throw new Error('Missing required parameters');
+                }
+
+                // Get device ID
+                let deviceId = localStorage.getItem('device_id');
+                if (!deviceId) {
+                    deviceId = Array(16).fill(0).map(() => Math.floor(Math.random()*16).toString(16).toUpperCase()).join('');
+                    localStorage.setItem('device_id', deviceId);
+                }
+
+                // Check if this is a Lockr checkpoint (cp_lockr_001) or Work.ink (cp_workink_001)
+                const isLockr = checkpointId === 'cp_lockr_001';
+                
+                if (isLockr) {
+                    // Lockr mode: No token verification needed - just the redirect itself is proof
+                    console.log('✅ Lockr verification - no token check needed');
+                } else if (!token) {
+                    // Work.ink mode but no token provided = bypass attempt
+                    console.warn('⚠️ Work.ink verification missing token - potential bypass');
+                    window.location.href = `/bypass?attempt=1&step=${stepNum}`;
+                    return;
+                } else {
+                    // Work.ink mode with token - check if it's been used before
+                    const usedTokens = JSON.parse(localStorage.getItem('kg_used_tokens') || '[]');
+                    
+                    if (usedTokens.includes(token)) {
+                        console.warn('⚠️ Token already used - blocking reuse');
+                        
+                        const bypassKey = 'kg_bypass_attempts';
+                        let bypassData = JSON.parse(localStorage.getItem(bypassKey) || '{"attempts": [], "blocked": false, "blockedUntil": null}');
+                        
+                        bypassData.attempts.push({
+                            step: stepNum,
+                            timestamp: Date.now(),
+                            reason: 'Token reuse'
+                        });
+                        
+                        localStorage.setItem(bypassKey, JSON.stringify(bypassData));
+                        window.location.href = `/bypass?attempt=${bypassData.attempts.length}&step=${stepNum}`;
+                        return;
+                    }
+                    
+                    // Mark token as used
+                    usedTokens.push(token);
+                    localStorage.setItem('kg_used_tokens', JSON.stringify(usedTokens));
+                    console.log('✅ Work.ink token validated and marked as used');
+                }
+
+                // Get or create user data
+                const userDataKey = `kg_data_${username}`;
+                let userData = JSON.parse(localStorage.getItem(userDataKey) || '{"sessionTokens": {}, "totalVerifications": 0}');
+                
+                if (!userData.sessionTokens) {
+                    userData.sessionTokens = {};
+                }
+
+                // Create session key
+                const sessionKey = `${checkpointId}-${stepNum}-${deviceId}`;
+
+                // Check if already verified
+                if (userData.sessionTokens[sessionKey] && userData.sessionTokens[sessionKey].verified) {
+                    console.log('ℹ️ Step already verified, skipping increment');
+                } else {
+                    // Mark as verified
+                    userData.sessionTokens[sessionKey] = {
+                        verified: true,
+                        verifiedAt: Date.now(),
+                        token: token || 'lockr_verified',
+                        checkpointId: checkpointId,
+                        step: stepNum
+                    };
+
+                    // Increment total verifications counter (only if not previously verified)
+                    if (!userData.totalVerifications) {
+                        userData.totalVerifications = 0;
+                    }
+                    userData.totalVerifications++;
+
+                    console.log('✅ Step verified! Total verifications:', userData.totalVerifications);
+                }
+
+                // Save updated data
+                localStorage.setItem(userDataKey, JSON.stringify(userData));
+
+                // Show success
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('success-state').classList.remove('hidden');
+
+                // Redirect back to appropriate checkpoint after 1.5 seconds
+                setTimeout(() => {
+                    if (checkpointId === 'cp_workink_001') {
+                        window.location.href = '/Workink';
+                    } else if (checkpointId === 'cp_lockr_001') {
+                        window.location.href = '/Lockr';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('❌ Callback error:', error);
+                
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message || 'An unexpected error occurred';
+            }
+        }
+
+        handleCallback();
+    </script>
+</body>
+</html>

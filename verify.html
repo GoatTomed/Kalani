@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting - KeyGuardius</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        html { background: #0a0a0a; min-height: 100%; }
+        body { background: #0a0a0a; color: #fafafa; min-height: 100vh; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <div class="border border-white/10 rounded-2xl p-8 bg-white/5 backdrop-blur-xl text-center">
+            <!-- Loading State -->
+            <div id="loading-state">
+                <div class="w-16 h-16 mx-auto mb-6 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-blue-500 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold mb-2">Generating Your Token...</h1>
+                <p class="text-zinc-400 text-sm mb-4">Preparing verification for step <span id="step-num"></span></p>
+                <div class="flex items-center justify-center gap-1">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="hidden">
+                <div class="w-16 h-16 mx-auto mb-6 bg-red-500/10 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold mb-2 text-red-400">Verification Error</h1>
+                <p id="error-message" class="text-zinc-400 text-sm mb-6">Something went wrong</p>
+                <a href="/dashboard" class="inline-flex items-center gap-2 h-11 px-6 bg-white/10 hover:bg-white/15 text-white rounded-lg border border-white/10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Success State -->
+            <div id="success-state" class="hidden">
+                <div class="w-16 h-16 mx-auto mb-6 bg-green-500/10 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold mb-2 text-green-400">Redirecting...</h1>
+                <p class="text-zinc-400 text-sm">Taking you to <span id="provider-name"></span></p>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-xs text-zinc-600">
+                Powered by <span class="text-blue-500 font-semibold">KeyGuardius</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function handleVerification() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const username = params.get('u');
+                const stepNum = parseInt(params.get('s'));
+                const checkpointId = params.get('cp');
+
+                document.getElementById('step-num').textContent = stepNum;
+
+                if (!username || !stepNum || !checkpointId) {
+                    throw new Error('Invalid verification link. Missing required parameters.');
+                }
+
+                console.log('🔍 Verification Request:');
+                console.log('   Username:', username);
+                console.log('   Step:', stepNum);
+                console.log('   Checkpoint ID:', checkpointId);
+
+                // Load checkpoint based on checkpoint ID
+                let checkpoint;
+                
+                if (checkpointId === 'cp_workink_001') {
+                    checkpoint = {
+                        id: 'cp_workink_001',
+                        name: 'Work.ink Method',
+                        user: 'Tom',
+                        steps: [
+                            {
+                                num: 1,
+                                title: 'First Step',
+                                prov: 'Work.ink',
+                                url: 'https://work.ink/2dbK/GetKey'
+                            },
+                            {
+                                num: 2,
+                                title: 'Last Step',
+                                prov: 'Work.ink',
+                                url: 'https://work.ink/2dbK/Last%20Step'
+                            }
+                        ]
+                    };
+                } else if (checkpointId === 'cp_lockr_001') {
+                    checkpoint = {
+                        id: 'cp_lockr_001',
+                        name: 'Lockr Method',
+                        user: 'Tom',
+                        steps: [
+                            {
+                                num: 1,
+                                title: 'First Checkpoint',
+                                prov: 'Lockr.so',
+                                url: 'https://lockr.so/MIrQvlBS'
+                            },
+                            {
+                                num: 2,
+                                title: 'Second Checkpoint',
+                                prov: 'Lockr.so',
+                                url: 'https://lockr.so/2ePc3iqT'
+                            }
+                        ]
+                    };
+                } else {
+                    // Fallback to old checkpoint ID for backwards compatibility
+                    checkpoint = {
+                        id: 'cp_getkey_001',
+                        name: 'Get Key',
+                        user: 'Tom',
+                        steps: [
+                            {
+                                num: 1,
+                                title: 'First Step',
+                                prov: 'Work.ink',
+                                url: 'https://work.ink/2dbK/GetKey'
+                            },
+                            {
+                                num: 2,
+                                title: 'Last Step',
+                                prov: 'Work.ink',
+                                url: 'https://work.ink/2dbK/Last%20Step'
+                            }
+                        ]
+                    };
+                }
+
+                const step = checkpoint.steps.find(s => s.num === stepNum);
+                if (!step) {
+                    throw new Error(`Step ${stepNum} not found`);
+                }
+
+                console.log('✅ Step found:', step.title);
+
+                // Work.ink will provide its own token when redirecting back
+                // We don't need to generate one ourselves
+                console.log('🚀 Redirecting to Work.ink...');
+                
+                // Redirect directly to Work.ink URL (no callback parameter needed)
+                // Work.ink is already configured with redirect URL in their dashboard
+                const providerUrl = step.url;
+
+                console.log('🚀 Redirecting to:', providerUrl);
+
+                // Show success state
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('success-state').classList.remove('hidden');
+                document.getElementById('provider-name').textContent = step.prov;
+
+                // Redirect after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = providerUrl;
+                }, 1500);
+
+            } catch (error) {
+                console.error('❌ Verification error:', error);
+                
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message || 'An unexpected error occurred';
+            }
+        }
+
+        handleVerification();
+    </script>
+</body>
+</html>
