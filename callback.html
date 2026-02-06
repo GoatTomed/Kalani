@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="notifications.js"></script>
+    <script src="rewards-system.js"></script>
     <style>
         * { font-family: 'DM Sans', sans-serif; }
         html { background: #0a0a0a; min-height: 100%; }
@@ -165,6 +166,11 @@
                     userData.totalVerifications++;
 
                     console.log('✅ Step verified! Total verifications:', userData.totalVerifications);
+                    
+                    // Award points for verification (if rewards system is loaded)
+                    if (window.RewardsSystem && window.RewardsSystem.awardVerificationPoints) {
+                        window.RewardsSystem.awardVerificationPoints();
+                    }
                 }
 
                 // Save updated data
