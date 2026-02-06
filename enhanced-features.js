@@ -9,6 +9,14 @@
     // ============================================
     const ThemeManager = {
         init() {
+            // One-time reset to dark mode (use version flag)
+            const themeVersion = localStorage.getItem('kg_theme_version');
+            if (themeVersion !== 'v3') {
+                // Reset to dark mode for v3
+                localStorage.setItem('kg_theme', 'dark');
+                localStorage.setItem('kg_theme_version', 'v3');
+            }
+            
             const savedTheme = localStorage.getItem('kg_theme') || 'dark';
             this.setTheme(savedTheme);
             this.createToggle();
