@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Redeem & Credits</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        body { 
+            background: #0a0a0a; 
+            color: white; 
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .redeem-btn {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+        }
+        .redeem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4);
+        }
+        .credits-btn {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            color: white;
+        }
+        .credits-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(234, 179, 8, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 32px; margin-bottom: 40px;">Test Redeem & Credits System</h1>
+    
+    <button class="redeem-btn" id="redeem-key-btn">
+        🎁 Open Redeem Key Modal
+    </button>
+    
+    <button class="credits-btn" id="credits-shop-btn">
+        💰 Open Credits Shop
+    </button>
+
+    <div style="margin-top: 40px; text-align: center; color: #666;">
+        <p>If clicking doesn't work, check browser console (F12) for errors</p>
+    </div>
+
+    <!-- Load scripts -->
+    <script src="notifications.js"></script>
+    <script src="rewards-system.js"></script>
+    <script src="redeem-system.js"></script>
+
+    <script>
+        console.log('Test page loaded');
+        console.log('Window object has RedeemSystem?', window.RedeemSystem);
+        
+        // Manual test buttons
+        document.getElementById('redeem-key-btn').addEventListener('click', function() {
+            console.log('Redeem button clicked!');
+            alert('Button was clicked - modal should open');
+        });
+    </script>
+</body>
+</html>
