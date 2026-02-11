@@ -266,48 +266,240 @@
 
         <!-- Analytics Tab -->
         <div class="tab-pane hidden" id="analytics-tab">
-            <div class="text-center py-20">
-                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Method Usage -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02]">
+                    <h3 class="text-lg font-bold mb-4">Method Usage</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-blue-400">Work.ink</span>
+                                <span class="font-mono" id="workink-usage">50%</span>
+                            </div>
+                            <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-purple-400">Lockr</span>
+                                <span class="font-mono" id="lockr-usage">50%</span>
+                            </div>
+                            <div class="h-3 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-purple-500" style="width: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-white/[0.08]">
+                        <div class="text-sm text-zinc-500 mb-2">Success Rate</div>
+                        <div class="text-3xl font-bold text-green-400">100%</div>
+                    </div>
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Analytics Dashboard</h3>
-                <p class="text-zinc-400 mb-8">Advanced analytics coming soon...</p>
+
+                <!-- Activity Chart -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02]">
+                    <h3 class="text-lg font-bold mb-4">Recent Activity</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium">Verification Completed</div>
+                                <div class="text-xs text-zinc-500">Work.ink - Step 2</div>
+                            </div>
+                            <div class="text-xs text-zinc-500">Just now</div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                            <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium">Key Generated</div>
+                                <div class="text-xs text-zinc-500">Valid for 24h</div>
+                            </div>
+                            <div class="text-xs text-zinc-500">5 min ago</div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium">Verification Completed</div>
+                                <div class="text-xs text-zinc-500">Lockr - Step 1</div>
+                            </div>
+                            <div class="text-xs text-zinc-500">1h ago</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Key Manager Tab -->
         <div class="tab-pane hidden" id="keys-tab">
-            <div class="text-center py-20">
-                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-500/10 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                    </svg>
+            <div class="mb-4 flex items-center gap-4">
+                <input type="text" placeholder="Search keys..." class="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                <select class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                    <option>All Keys</option>
+                    <option>Active Only</option>
+                    <option>Expired Only</option>
+                </select>
+                <button class="px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg text-green-400 text-sm font-medium transition-all">
+                    Export All
+                </button>
+            </div>
+
+            <div class="space-y-4" id="keys-list">
+                <!-- Work.ink Key -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm font-semibold text-blue-400 uppercase">Work.ink</span>
+                                <span class="px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs font-semibold text-green-400">Active</span>
+                            </div>
+                            <div class="font-mono text-sm bg-white/5 px-3 py-2 rounded border border-white/10 break-all" id="admin-workink-key">
+                                No key generated yet
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="text-zinc-500">
+                            Expires in: <span class="font-mono font-semibold" id="admin-workink-countdown">--:--:--</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition-all">Copy</button>
+                            <button class="px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 rounded text-xs font-medium transition-all">Save</button>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Key Manager</h3>
-                <p class="text-zinc-400 mb-8">Advanced key management coming soon...</p>
+
+                <!-- Lockr Key -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02] card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-sm font-semibold text-purple-400 uppercase">Lockr</span>
+                                <span class="px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs font-semibold text-green-400">Active</span>
+                            </div>
+                            <div class="font-mono text-sm bg-white/5 px-3 py-2 rounded border border-white/10 break-all" id="admin-lockr-key">
+                                No key generated yet
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="text-zinc-500">
+                            Expires in: <span class="font-mono font-semibold" id="admin-lockr-countdown">--:--:--</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition-all">Copy</button>
+                            <button class="px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 rounded text-xs font-medium transition-all">Save</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Tools Tab -->
         <div class="tab-pane hidden" id="tools-tab">
-            <div class="text-center py-20">
-                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Export & Backup -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02]">
+                    <h3 class="text-lg font-bold mb-4">Export & Backup</h3>
+                    <div class="space-y-3">
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Export All Data (JSON)
+                        </button>
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                            Import Data
+                        </button>
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                            </svg>
+                            Create Backup
+                        </button>
+                    </div>
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Admin Tools</h3>
-                <p class="text-zinc-400 mb-8">System tools coming soon...</p>
+
+                <!-- System Tools -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02]">
+                    <h3 class="text-lg font-bold mb-4">System Tools</h3>
+                    <div class="space-y-3">
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Refresh All Stats
+                        </button>
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Clear Expired Keys
+                        </button>
+                        <button class="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all flex items-center gap-3">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="border border-white/[0.08] rounded-xl p-6 bg-white/[0.02]">
+                    <h3 class="text-lg font-bold mb-4">Settings</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Auto-refresh</span>
+                            <input type="checkbox" checked class="w-10 h-5 bg-blue-600 rounded-full appearance-none cursor-pointer">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Show notifications</span>
+                            <input type="checkbox" checked class="w-10 h-5 bg-blue-600 rounded-full appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="text-sm block mb-2">Refresh interval (seconds)</label>
+                            <input type="number" value="2" min="1" max="60" class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="border border-red-500/30 rounded-xl p-6 bg-red-500/5">
+                    <h3 class="text-lg font-bold mb-2 text-red-400">Danger Zone</h3>
+                    <p class="text-sm text-zinc-500 mb-4">These actions cannot be undone</p>
+                    <div class="space-y-3">
+                        <button class="w-full px-4 py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-lg text-red-400 text-sm font-medium transition-all">
+                            Clear All Data
+                        </button>
+                        <button class="w-full px-4 py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-lg text-red-400 text-sm font-medium transition-all">
+                            Reset All Progress
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // Tab switching
-        function switchTab(tabName, button) {
+        window.switchTab = function(tabName, button) {
+            console.log('Switching to tab:', tabName);
+            
             // Update buttons
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active', 'text-blue-400');
@@ -322,8 +514,14 @@
             });
 
             // Show selected pane
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
-        }
+            const selectedPane = document.getElementById(tabName + '-tab');
+            if (selectedPane) {
+                selectedPane.classList.remove('hidden');
+                console.log('Showing tab:', tabName);
+            } else {
+                console.error('Tab not found:', tabName + '-tab');
+            }
+        };
 
         // Refresh stats button
         document.getElementById('refresh-stats')?.addEventListener('click', function() {
