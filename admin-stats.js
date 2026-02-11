@@ -11,7 +11,7 @@
     if (isAdmin) {
         document.getElementById('admin-tabs')?.style.setProperty('display', 'flex');
         document.getElementById('admin-stats')?.style.setProperty('display', 'grid');
-        console.log('✅ Admin mode enabled');
+        console.log(' Admin mode enabled');
     }
 
     // Initialize checkpoints
@@ -275,10 +275,10 @@
         }
     }, 2000);
 
-    console.log('✅ Admin Stats System loaded');
+    console.log(' Admin Stats System loaded');
     if (isAdmin) {
-        console.log('📊 Admin features are visible');
+        console.log(' Admin features are visible');
     } else {
-        console.log('👤 User mode - admin features hidden');
+        console.log(' User mode - admin features hidden');
     }
 })();
